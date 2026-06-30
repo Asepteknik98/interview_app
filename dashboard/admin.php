@@ -123,6 +123,43 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        body{
+    background:#eef4fb;
+}
+
+.card-hover{
+
+transition:.25s;
+
+}
+
+.card-hover:hover{
+
+transform:translateY(-5px);
+
+box-shadow:0 20px 35px rgba(0,0,0,.08);
+
+}
+
+.glass{
+
+background:rgba(255,255,255,.8);
+
+backdrop-filter:blur(18px);
+
+}
+
+.table-row-item{
+
+transition:.25s;
+
+}
+
+.table-row-item:hover{
+
+transform:scale(1.005);
+
+}
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -259,7 +296,56 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
 </nav>
 
     <main class="p-4 sm:p-6 max-w-7xl w-full mx-auto flex-grow space-y-5">
-        
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900 via-sky-700 to-cyan-600 text-white p-8 shadow-xl">
+
+    <div class="absolute right-0 top-0 opacity-10">
+
+        <i class="fa-solid fa-graduation-cap text-[220px]"></i>
+
+    </div>
+
+    <div class="relative z-10">
+
+        <span class="uppercase tracking-[4px] text-xs font-semibold text-blue-100">
+            Administrator Dashboard
+        </span>
+
+        <h2 class="text-4xl font-black mt-2">
+            Selamat Datang 👋
+        </h2>
+
+        <p class="mt-3 text-blue-100 max-w-2xl leading-relaxed">
+
+            Kelola seluruh proses diagnostik minat bakat siswa,
+            pantau perkembangan peserta,
+            serta lakukan administrasi PPDB melalui dashboard modern ini.
+
+        </p>
+
+        <div class="mt-8">
+
+            <div class="flex justify-between text-sm mb-2">
+
+                <span>Progress Pengisian Tes</span>
+
+                <span><?= $persentase ?>%</span>
+
+            </div>
+
+            <div class="w-full h-4 rounded-full bg-white/20 overflow-hidden">
+
+                <div
+                    class="h-full rounded-full bg-emerald-400 transition-all duration-700"
+                    style="width:<?= $persentase ?>%">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
         <?= $notif; ?>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -661,6 +747,27 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
         }
     });
     <?php endif; ?>
+
+            function updateClock(){
+
+        const now=new Date();
+
+        document.getElementById("clock").innerHTML=
+        now.toLocaleTimeString('id-ID');
+
+        document.getElementById("today").innerHTML=
+        now.toLocaleDateString('id-ID',{
+        weekday:'long',
+        day:'numeric',
+        month:'long',
+        year:'numeric'
+        });
+
+        }
+
+        updateClock();
+
+        setInterval(updateClock,1000);
     </script>
 </body>
 </html>
