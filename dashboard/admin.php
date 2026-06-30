@@ -88,6 +88,12 @@ $query_siswa_full = "SELECT users.id, users.username, users.nama_lengkap, hasil_
                      $where_clause 
                      ORDER BY users.nama_lengkap ASC";
 $siswa_result = $conn->query($query_siswa_full);
+$siswa_rows = [];
+if ($siswa_result) {
+    while ($siswa_row = $siswa_result->fetch_assoc()) {
+        $siswa_rows[] = $siswa_row;
+    }
+}
 
 // MATRIKS REF
 $matriks_riasec = [
@@ -152,6 +158,14 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
             box-shadow: 0 18px 45px rgba(15, 23, 42, .055);
         }
 
+        .workspace-section {
+            animation: workspaceIn .24s ease-out both;
+        }
+
+        .workspace-section.hidden {
+            display: none !important;
+        }
+
         .metric-card {
             position: relative;
             overflow: hidden;
@@ -181,6 +195,10 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
         .nav-link.active {
             background: rgba(37, 99, 235, .16);
             color: #fff;
+        }
+
+        .nav-link.active {
+            box-shadow: inset 3px 0 0 #60a5fa;
         }
 
         .nav-link i {
@@ -275,6 +293,17 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
             }
         }
 
+        @keyframes workspaceIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @media (max-width: 1023px) {
             #sidebar {
                 transform: translateX(-100%);
@@ -357,12 +386,13 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
             </div>
 
             <nav class="flex-1 space-y-1 px-4 py-5">
-                <a href="#dashboard" class="nav-link active"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
-                <a href="#data-siswa" class="nav-link"><i class="fa-solid fa-users"></i> Data Siswa</a>
-                <a href="#registrasi" class="nav-link"><i class="fa-solid fa-user-plus"></i> Registrasi</a>
-                <a href="#hasil-tes" class="nav-link"><i class="fa-solid fa-clipboard-check"></i> Hasil Tes</a>
-                <a href="#statistik" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Statistik</a>
-                <a href="#matriks" class="nav-link"><i class="fa-solid fa-table-cells-large"></i> Matriks RIASEC</a>
+                <a href="#dashboard" class="nav-link active" data-workspace-link="dashboard"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+                <a href="#data-siswa" class="nav-link" data-workspace-link="data-siswa"><i class="fa-solid fa-users"></i> Data Siswa</a>
+                <a href="#registrasi" class="nav-link" data-workspace-link="registrasi"><i class="fa-solid fa-user-plus"></i> Registrasi</a>
+                <a href="#hasil-tes" class="nav-link" data-workspace-link="hasil-tes"><i class="fa-solid fa-clipboard-check"></i> Hasil Tes</a>
+                <a href="#statistik" class="nav-link" data-workspace-link="statistik"><i class="fa-solid fa-chart-pie"></i> Statistik</a>
+                <a href="#matriks" class="nav-link" data-workspace-link="matriks"><i class="fa-solid fa-table-cells-large"></i> Matriks RIASEC</a>
+                <a href="#pengaturan" class="nav-link" data-workspace-link="pengaturan"><i class="fa-solid fa-gear"></i> Pengaturan</a>
             </nav>
 
             <div class="border-t border-white/10 p-4">
@@ -406,8 +436,20 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
             </div>
         </nav>
 
-        <main class="space-y-8 px-4 py-6 sm:px-6 lg:px-8">
-            <section id="dashboard" class="space-y-6">
+        <main class="px-4 py-6 sm:px-6 lg:px-8">
+            <div class="mb-6 flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between no-print">
+                <div>
+                    <div class="flex items-center gap-2 text-xs font-black uppercase tracking-[.18em] text-slate-400">
+                        <span>Admin</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        <span id="workspaceBreadcrumb" class="text-blue-600">Dashboard</span>
+                    </div>
+                    <h2 id="workspaceTitle" class="mt-2 text-2xl font-black text-slate-900">Dashboard</h2>
+                </div>
+                <p id="workspaceSubtitle" class="max-w-xl text-sm font-medium leading-6 text-slate-500">Monitoring ringkas sistem diagnostik PPDB.</p>
+            </div>
+
+            <section id="dashboard" class="workspace-section space-y-6" data-workspace-title="Dashboard" data-workspace-subtitle="Monitoring ringkas sistem diagnostik PPDB.">
                 <div class="dashboard-hero overflow-hidden rounded-[28px] bg-gradient-to-br from-blue-700 via-blue-600 to-cyan-500 p-6 text-white shadow-xl sm:p-8">
                     <div class="grid gap-8 lg:grid-cols-[1.6fr_.9fr] lg:items-center">
                         <div>
@@ -437,11 +479,11 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                                 </div>
                             </div>
                             <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
-                                <a href="admin.php?filter=sudah#data-siswa" class="rounded-2xl bg-white/12 p-4 transition hover:bg-white/20">
+                                <a href="#hasil-tes" data-workspace-jump="hasil-tes" class="rounded-2xl bg-white/12 p-4 transition hover:bg-white/20">
                                     <p class="font-black"><?= number_format($count_sudah) ?></p>
                                     <p class="text-blue-50">Sudah tes</p>
                                 </a>
-                                <a href="admin.php?filter=belum#data-siswa" class="rounded-2xl bg-white/12 p-4 transition hover:bg-white/20">
+                                <a href="#data-siswa" data-workspace-jump="data-siswa" class="rounded-2xl bg-white/12 p-4 transition hover:bg-white/20">
                                     <p class="font-black"><?= number_format($count_belum) ?></p>
                                     <p class="text-blue-50">Belum tes</p>
                                 </a>
@@ -453,7 +495,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                 <?= $notif; ?>
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <a href="admin.php?filter=#data-siswa" class="metric-card bg-gradient-to-br from-blue-600 to-blue-800 p-5 text-white">
+                    <a href="#data-siswa" data-workspace-jump="data-siswa" class="metric-card bg-gradient-to-br from-blue-600 to-blue-800 p-5 text-white">
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-xs font-black uppercase tracking-[.16em] text-blue-100">Total Siswa</p>
@@ -463,7 +505,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                         </div>
                         <p class="mt-5 text-sm font-medium text-blue-50">Semua akun siswa terdaftar.</p>
                     </a>
-                    <a href="admin.php?filter=sudah#data-siswa" class="metric-card bg-gradient-to-br from-emerald-500 to-green-700 p-5 text-white">
+                    <a href="#hasil-tes" data-workspace-jump="hasil-tes" class="metric-card bg-gradient-to-br from-emerald-500 to-green-700 p-5 text-white">
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-xs font-black uppercase tracking-[.16em] text-emerald-50">Sudah Tes</p>
@@ -473,7 +515,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                         </div>
                         <p class="mt-5 text-sm font-medium text-emerald-50"><?= $persentase ?>% peserta selesai.</p>
                     </a>
-                    <a href="admin.php?filter=belum#data-siswa" class="metric-card bg-gradient-to-br from-amber-400 to-orange-500 p-5 text-white">
+                    <a href="#data-siswa" data-workspace-jump="data-siswa" class="metric-card bg-gradient-to-br from-amber-400 to-orange-500 p-5 text-white">
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-xs font-black uppercase tracking-[.16em] text-amber-50">Belum Tes</p>
@@ -495,6 +537,35 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                     </div>
                 </div>
 
+                <div class="section-card p-5 sm:p-6">
+                    <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900">Grafik Ringkasan Jurusan</h3>
+                            <p class="text-sm font-medium text-slate-500">Cuplikan distribusi hasil tes untuk monitoring cepat.</p>
+                        </div>
+                        <a href="#statistik" data-workspace-jump="statistik" class="btn-soft px-3 py-2 text-xs">Lihat Statistik</a>
+                    </div>
+                    <div class="space-y-3">
+                        <?php if(!empty($labels_chart)): ?>
+                            <?php $max_chart = max($data_chart); ?>
+                            <?php foreach(array_slice($labels_chart, 0, 5) as $idx => $label): ?>
+                                <?php $bar_width = ($max_chart > 0) ? round(($data_chart[$idx] / $max_chart) * 100) : 0; ?>
+                                <div>
+                                    <div class="mb-1 flex items-center justify-between gap-3 text-xs font-black text-slate-600">
+                                        <span class="truncate"><?= htmlspecialchars($label); ?></span>
+                                        <span><?= number_format($data_chart[$idx]); ?></span>
+                                    </div>
+                                    <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                                        <div class="h-full rounded-full bg-blue-600" style="width:<?= $bar_width ?>%"></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="rounded-2xl bg-slate-50 p-5 text-sm font-medium italic text-slate-400">Belum ada data grafik ringkasan.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <div class="grid gap-6 xl:grid-cols-3">
                     <div class="section-card p-5 xl:col-span-2">
                         <div class="mb-5 flex items-center justify-between">
@@ -502,10 +573,10 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                                 <h3 class="text-base font-black text-slate-900">Aktivitas Terbaru</h3>
                                 <p class="text-sm font-medium text-slate-500">Akses cepat untuk pekerjaan rutin administrator.</p>
                             </div>
-                            <a href="#data-siswa" class="btn-soft px-3 py-2 text-xs">Lihat Data</a>
+                            <a href="#data-siswa" data-workspace-jump="data-siswa" class="btn-soft px-3 py-2 text-xs">Lihat Data</a>
                         </div>
                         <div class="grid gap-3 md:grid-cols-3">
-                            <a href="#registrasi" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-200 hover:bg-blue-50">
+                            <a href="#registrasi" data-workspace-jump="registrasi" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-200 hover:bg-blue-50">
                                 <i class="fa-solid fa-user-plus text-lg text-blue-600"></i>
                                 <p class="mt-3 font-black text-slate-800">Tambah siswa</p>
                                 <p class="mt-1 text-xs leading-5 text-slate-500">Registrasi akun peserta baru.</p>
@@ -542,7 +613,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                 </div>
             </section>
 
-            <section id="registrasi" class="section-card p-5 sm:p-6 no-print">
+            <section id="registrasi" class="workspace-section section-card hidden p-5 sm:p-6 no-print" data-workspace-title="Registrasi" data-workspace-subtitle="Pendaftaran akun siswa baru dan informasi reset password.">
                 <div class="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-5 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <h2 class="text-xl font-black text-slate-900">Registrasi Siswa</h2>
@@ -573,13 +644,13 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                 </form>
             </section>
 
-            <section id="data-siswa" class="section-card printable-table overflow-hidden">
+            <section id="data-siswa" class="workspace-section section-card printable-table hidden overflow-hidden" data-workspace-title="Data Siswa" data-workspace-subtitle="Kelola identitas siswa, pencarian, filter, export, edit akun, dan hapus akun.">
                 <div class="border-b border-slate-200 p-5 sm:p-6">
                     <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                         <div>
                             <h2 class="text-xl font-black text-slate-900">Data Siswa</h2>
                             <p class="mt-1 text-sm font-medium text-slate-500">Search, filter, export, aksi akun, hasil tes, dan pagination dalam satu area kerja.</p>
-                            <p class="mt-2 text-xs font-bold text-slate-400">Baris aktif: <strong id="filterCounter" class="text-slate-800"><?= $siswa_result->num_rows; ?></strong></p>
+                            <p class="mt-2 text-xs font-bold text-slate-400">Baris aktif: <strong id="filterCounter" class="text-slate-800"><?= count($siswa_rows); ?></strong></p>
                         </div>
 
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center no-print">
@@ -598,19 +669,18 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[980px] text-left" id="siswaDataTable">
+                    <table class="w-full min-w-[780px] text-left" id="siswaDataTable">
                         <thead class="sticky top-0 z-10 bg-slate-50 text-[11px] uppercase tracking-[.12em] text-slate-500">
                             <tr>
                                 <th class="px-5 py-4 font-black">Identitas Calon Siswa</th>
                                 <th class="px-5 py-4 text-center font-black">Status</th>
-                                <th class="px-5 py-4 text-center font-black">Kode</th>
-                                <th class="px-5 py-4 font-black">Prioritas Rekomendasi Jurusan</th>
+                                <th class="px-5 py-4 font-black">Informasi Akun</th>
                                 <th class="px-5 py-4 text-center font-black no-print">Tindakan Admin</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-sm">
-                            <?php if($siswa_result && $siswa_result->num_rows > 0): ?>
-                                <?php while($row = $siswa_result->fetch_assoc()): 
+                            <?php if(!empty($siswa_rows)): ?>
+                                <?php foreach($siswa_rows as $row): 
                                     $o2 = "-"; $o3 = "-";
                                     if(!empty($row['keterangan_jurusan'])) {
                                         $ex = explode(' | Opsi 3: ', $row['keterangan_jurusan']);
@@ -636,33 +706,22 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                                                 <?= !empty($row['rekomendasi_jurusan']) ? 'Sudah Tes' : 'Belum Tes'; ?>
                                             </span>
                                         </td>
-                                        <td class="px-5 py-4 text-center font-mono">
-                                            <?= !empty($row['kombinasi_kode']) ? "<span class='inline-flex rounded-xl bg-orange-50 px-3 py-1.5 text-xs font-black text-orange-600 ring-1 ring-orange-100'>".$row['kombinasi_kode']."</span>" : "<span class='text-slate-300 italic'>-</span>"; ?>
-                                        </td>
                                         <td class="px-5 py-4">
-                                            <?php if(!empty($row['rekomendasi_jurusan'])): ?>
-                                                <div class="font-black uppercase text-slate-900"><i class="fa-solid fa-circle-check mr-1.5 text-xs text-emerald-500"></i>P1: <span class="text-blue-700"><?= $row['rekomendasi_jurusan']; ?></span></div>
-                                                <div class="mt-1 text-xs font-bold uppercase leading-5 text-slate-500">P2: <span class="text-slate-700"><?= $o2; ?></span> &bull; P3: <span class="text-slate-700"><?= $o3; ?></span></div>
-                                            <?php else: ?>
-                                                <span class="text-sm italic text-slate-400">Menunggu pengerjaan tes...</span>
-                                            <?php endif; ?>
+                                            <div class="font-bold text-slate-700">Username: <span class="font-mono text-slate-900"><?= $row['username']; ?></span></div>
+                                            <div class="mt-1 text-xs font-medium text-slate-500">Password awal mengikuti data yang dibuat saat registrasi.</div>
                                         </td>
                                         <td class="px-5 py-4 text-center no-print">
                                             <div class="flex justify-center gap-2">
-                                                <?php if(!empty($row['rekomendasi_jurusan'])): ?>
-                                                    <a href="cetak_siswa.php?id=<?= $row['id']; ?>" target="_blank" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-blue-600 shadow-sm transition hover:bg-blue-50" title="Print Lembar Hasil"><i class="fa-solid fa-print"></i></a>
-                                                    <a href="admin.php?aksi=reset&id=<?= $row['id']; ?>&filter=<?= $filter_status; ?>" onclick="return confirm('Apakah Anda yakin ingin me-reset hasil tes ini?')" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50" title="Reset Ujian"><i class="fa-solid fa-rotate-left"></i></a>
-                                                <?php endif; ?>
                                                 <button onclick="bukaModal(<?= $row['id']; ?>, '<?= htmlspecialchars($row['username']); ?>', '<?= htmlspecialchars($row['nama_lengkap']); ?>')" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-amber-600 shadow-sm transition hover:bg-amber-50" title="Edit Akun"><i class="fa-solid fa-user-pen"></i></button>
                                                 <a href="admin.php?aksi=hapus&id=<?= $row['id']; ?>&filter=<?= $filter_status; ?>" onclick="return confirm('Hapus permanen akun pendaftar?')" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-rose-600 shadow-sm transition hover:bg-rose-50" title="Hapus"><i class="fa-solid fa-trash"></i></a>
                                             </div>
                                         </td>
                                     </tr>
-                                <?php endwhile; ?>
+                                <?php endforeach; ?>
                             <?php else: ?>
-                                <tr id="noDataRow"><td colspan="5" class="p-10 text-center font-medium italic text-slate-400">Data pendaftar kosong.</td></tr>
+                                <tr id="noDataRow"><td colspan="4" class="p-10 text-center font-medium italic text-slate-400">Data pendaftar kosong.</td></tr>
                             <?php endif; ?>
-                            <tr id="liveSearchEmptyRow" class="hidden"><td colspan="5" class="p-10 text-center font-medium italic text-slate-400">Data siswa yang Anda cari tidak ditemukan.</td></tr>
+                            <tr id="liveSearchEmptyRow" class="hidden"><td colspan="4" class="p-10 text-center font-medium italic text-slate-400">Data siswa yang Anda cari tidak ditemukan.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -673,12 +732,12 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                 </div>
             </section>
 
-            <section id="hasil-tes" class="grid gap-6 xl:grid-cols-3">
+            <section id="hasil-tes" class="workspace-section hidden grid gap-6 xl:grid-cols-3" data-workspace-title="Hasil Tes" data-workspace-subtitle="Fokus pada siswa yang sudah tes, rekomendasi jurusan, cetak hasil, dan reset hasil.">
                 <div class="section-card p-5 sm:p-6">
                     <h2 class="text-xl font-black text-slate-900">Hasil Tes</h2>
                     <p class="mt-2 text-sm font-medium leading-6 text-slate-500">Gunakan filter cepat untuk melihat siswa yang sudah tes, mencetak hasil per siswa, atau melakukan reset hasil tes dari tabel data.</p>
                     <div class="mt-5 grid gap-3">
-                        <a href="admin.php?filter=sudah#data-siswa" class="btn-primary px-4 py-3 text-sm"><i class="fa-solid fa-clipboard-check"></i> Daftar Sudah Tes</a>
+                        <a href="admin.php?filter=sudah#hasil-tes" class="btn-primary px-4 py-3 text-sm"><i class="fa-solid fa-clipboard-check"></i> Daftar Sudah Tes</a>
                         <a href="admin.php?filter=belum#data-siswa" class="btn-soft px-4 py-3 text-sm"><i class="fa-solid fa-hourglass-half"></i> Daftar Belum Tes</a>
                         <button onclick="window.print()" class="btn-soft px-4 py-3 text-sm no-print"><i class="fa-solid fa-print"></i> Cetak Rekap Admin</button>
                     </div>
@@ -702,9 +761,76 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                         Filter status tersedia melalui tombol cepat, sedangkan pencarian instan pada tabel tetap menggunakan nama siswa atau NIS.
                     </div>
                 </div>
+
+                <div class="section-card overflow-hidden xl:col-span-3">
+                    <div class="border-b border-slate-200 p-5 sm:p-6">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Daftar Siswa Sudah Tes</h3>
+                                <p class="mt-1 text-sm font-medium text-slate-500">Hasil rekomendasi jurusan, cetak hasil, dan reset tes dalam satu workspace.</p>
+                            </div>
+                            <div class="relative min-w-0 lg:w-80 no-print">
+                                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="hasilSearchInput" placeholder="Cari nama, NIS, kode, atau jurusan..." class="form-input pl-11">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-[980px] text-left">
+                            <thead class="bg-slate-50 text-[11px] uppercase tracking-[.12em] text-slate-500">
+                                <tr>
+                                    <th class="px-5 py-4 font-black">Siswa</th>
+                                    <th class="px-5 py-4 text-center font-black">Kode RIASEC</th>
+                                    <th class="px-5 py-4 font-black">Rekomendasi Jurusan</th>
+                                    <th class="px-5 py-4 text-center font-black no-print">Aksi Hasil</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm" id="hasilTesTableBody">
+                                <?php $hasil_ada = false; ?>
+                                <?php foreach($siswa_rows as $row): ?>
+                                    <?php if(!empty($row['rekomendasi_jurusan'])): ?>
+                                        <?php
+                                            $hasil_ada = true;
+                                            $o2 = "-"; $o3 = "-";
+                                            if(!empty($row['keterangan_jurusan'])) {
+                                                $ex = explode(' | Opsi 3: ', $row['keterangan_jurusan']);
+                                                $o2 = str_replace('Opsi 2: ', '', $ex[0] ?? '-');
+                                                $o3 = $ex[1] ?? '-';
+                                            }
+                                        ?>
+                                        <tr class="hasil-row-item odd:bg-white even:bg-slate-50/55 transition hover:bg-blue-50"
+                                            data-search="<?= strtolower(htmlspecialchars($row['nama_lengkap'].' '.$row['username'].' '.$row['kombinasi_kode'].' '.$row['rekomendasi_jurusan'].' '.$o2.' '.$o3)); ?>">
+                                            <td class="px-5 py-4">
+                                                <span class="block font-black text-slate-900"><?= htmlspecialchars($row['nama_lengkap']); ?></span>
+                                                <span class="mt-1 block font-mono text-xs font-bold text-slate-500"><?= $row['username']; ?></span>
+                                            </td>
+                                            <td class="px-5 py-4 text-center font-mono">
+                                                <span class="inline-flex rounded-xl bg-orange-50 px-3 py-1.5 text-xs font-black text-orange-600 ring-1 ring-orange-100"><?= $row['kombinasi_kode']; ?></span>
+                                            </td>
+                                            <td class="px-5 py-4">
+                                                <div class="font-black uppercase text-slate-900">P1: <span class="text-blue-700"><?= $row['rekomendasi_jurusan']; ?></span></div>
+                                                <div class="mt-1 text-xs font-bold uppercase leading-5 text-slate-500">P2: <span class="text-slate-700"><?= $o2; ?></span> &bull; P3: <span class="text-slate-700"><?= $o3; ?></span></div>
+                                            </td>
+                                            <td class="px-5 py-4 text-center no-print">
+                                                <div class="flex justify-center gap-2">
+                                                    <a href="cetak_siswa.php?id=<?= $row['id']; ?>" target="_blank" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-blue-600 shadow-sm transition hover:bg-blue-50" title="Print Lembar Hasil"><i class="fa-solid fa-print"></i></a>
+                                                    <a href="admin.php?aksi=reset&id=<?= $row['id']; ?>&filter=<?= $filter_status; ?>#hasil-tes" onclick="return confirm('Apakah Anda yakin ingin me-reset hasil tes ini?')" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50" title="Reset Ujian"><i class="fa-solid fa-rotate-left"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                                <?php if(!$hasil_ada): ?>
+                                    <tr><td colspan="4" class="p-10 text-center font-medium italic text-slate-400">Belum ada siswa yang menyelesaikan tes.</td></tr>
+                                <?php endif; ?>
+                                <tr id="hasilSearchEmptyRow" class="hidden"><td colspan="4" class="p-10 text-center font-medium italic text-slate-400">Data hasil tes yang Anda cari tidak ditemukan.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </section>
 
-            <section id="statistik" class="grid gap-6 xl:grid-cols-12">
+            <section id="statistik" class="workspace-section hidden grid gap-6 xl:grid-cols-12" data-workspace-title="Statistik" data-workspace-subtitle="Visualisasi data, persentase peserta, dan ranking jurusan.">
                 <div class="section-card chart-container-wrapper p-5 sm:p-6 xl:col-span-5">
                     <div class="mb-5">
                         <h2 class="text-xl font-black text-slate-900">Donut Chart</h2>
@@ -756,7 +882,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                 </div>
             </section>
 
-            <section id="matriks" class="section-card overflow-hidden">
+            <section id="matriks" class="workspace-section section-card hidden overflow-hidden" data-workspace-title="Matriks RIASEC" data-workspace-subtitle="Referensi pemetaan kompetensi RIASEC dan jurusan.">
                 <div class="border-b border-slate-200 p-5 sm:p-6">
                     <h2 class="text-xl font-black text-slate-900">Matriks RIASEC</h2>
                     <p class="mt-1 text-sm font-medium text-slate-500">Referensi pemetaan kompetensi dan penjelasan jurusan untuk validasi hasil rekomendasi.</p>
@@ -782,6 +908,47 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <section id="pengaturan" class="workspace-section hidden grid gap-6 xl:grid-cols-3" data-workspace-title="Pengaturan" data-workspace-subtitle="Informasi sistem, profil administrator, versi aplikasi, dan tentang sistem.">
+                <div class="section-card p-5 sm:p-6">
+                    <h2 class="text-xl font-black text-slate-900">Profil Administrator</h2>
+                    <div class="mt-5 flex items-center gap-4 rounded-2xl bg-slate-50 p-4">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                            <i class="fa-solid fa-user-shield text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-black text-slate-900">Administrator</p>
+                            <p class="text-sm font-medium text-slate-500">Hak akses penuh dashboard PPDB.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card p-5 sm:p-6">
+                    <h2 class="text-xl font-black text-slate-900">Informasi Sistem</h2>
+                    <div class="mt-5 space-y-3">
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
+                            <span class="text-sm font-bold text-slate-600">Status</span>
+                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">Aktif</span>
+                        </div>
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
+                            <span class="text-sm font-bold text-slate-600">Versi</span>
+                            <span class="text-sm font-black text-slate-800">2026</span>
+                        </div>
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
+                            <span class="text-sm font-bold text-slate-600">Mode</span>
+                            <span class="text-sm font-black text-slate-800">Single Workspace</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card p-5 sm:p-6">
+                    <h2 class="text-xl font-black text-slate-900">Tentang Sistem</h2>
+                    <p class="mt-4 text-sm font-medium leading-7 text-slate-600">Sistem Diagnostik Minat dan Bakat PPDB membantu administrator memantau peserta, mengelola akun, melihat hasil rekomendasi jurusan, dan membaca statistik distribusi minat.</p>
+                    <div class="mt-5 rounded-2xl bg-blue-50 p-4 text-sm font-bold text-blue-700">
+                        <i class="fa-solid fa-code mr-2"></i> Developer: PPDB Web System
+                    </div>
                 </div>
             </section>
         </main>
@@ -948,6 +1115,29 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
 
     document.addEventListener("DOMContentLoaded", initPagination);
 
+    const hasilSearchInput = document.getElementById('hasilSearchInput');
+    const hasilRows = Array.from(document.querySelectorAll('.hasil-row-item'));
+    const hasilEmptyRow = document.getElementById('hasilSearchEmptyRow');
+
+    function filterHasilTes() {
+        const keyword = hasilSearchInput ? hasilSearchInput.value.toLowerCase().trim() : '';
+        let visibleRows = 0;
+
+        hasilRows.forEach(row => {
+            const match = row.getAttribute('data-search').includes(keyword);
+            row.classList.toggle('hidden', !match);
+            if (match) visibleRows++;
+        });
+
+        if (hasilEmptyRow) {
+            hasilEmptyRow.classList.toggle('hidden', visibleRows > 0 || hasilRows.length === 0);
+        }
+    }
+
+    if (hasilSearchInput) {
+        hasilSearchInput.addEventListener('input', filterHasilTes);
+    }
+
     // ENGINE CHART.JS
     <?php if(!empty($data_chart)): ?>
     const chartColors = [
@@ -1030,6 +1220,10 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const navLinks = document.querySelectorAll('.nav-link');
+    const workspaceSections = document.querySelectorAll('.workspace-section');
+    const workspaceTitle = document.getElementById('workspaceTitle');
+    const workspaceSubtitle = document.getElementById('workspaceSubtitle');
+    const workspaceBreadcrumb = document.getElementById('workspaceBreadcrumb');
 
     function closeSidebar() {
         sidebar.classList.remove('open');
@@ -1047,12 +1241,69 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
         sidebarOverlay.addEventListener('click', closeSidebar);
     }
 
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.forEach(item => item.classList.remove('active'));
-            link.classList.add('active');
-            closeSidebar();
+    function resizeCharts() {
+        ['riasecDonutChart', 'riasecBarChart'].forEach(id => {
+            const canvas = document.getElementById(id);
+            const chart = canvas && Chart.getChart ? Chart.getChart(canvas) : null;
+            if (chart) chart.resize();
         });
+    }
+
+    function activateWorkspace(targetId, updateHash = true) {
+        const target = document.getElementById(targetId) || document.getElementById('dashboard');
+        const activeId = target ? target.id : 'dashboard';
+
+        workspaceSections.forEach(section => {
+            section.classList.toggle('hidden', section.id !== activeId);
+        });
+
+        navLinks.forEach(item => {
+            item.classList.toggle('active', item.getAttribute('data-workspace-link') === activeId);
+        });
+
+        const title = target.getAttribute('data-workspace-title') || 'Dashboard';
+        const subtitle = target.getAttribute('data-workspace-subtitle') || '';
+        if (workspaceTitle) workspaceTitle.innerText = title;
+        if (workspaceSubtitle) workspaceSubtitle.innerText = subtitle;
+        if (workspaceBreadcrumb) workspaceBreadcrumb.innerText = title;
+
+        if (updateHash && window.location.hash !== `#${activeId}`) {
+            history.replaceState(null, '', `#${activeId}`);
+        }
+
+        if (activeId === 'statistik') {
+            setTimeout(resizeCharts, 80);
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        closeSidebar();
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', event => {
+            event.preventDefault();
+            activateWorkspace(link.getAttribute('data-workspace-link'));
+        });
+    });
+
+    document.querySelectorAll('[data-workspace-jump]').forEach(link => {
+        link.addEventListener('click', event => {
+            event.preventDefault();
+            activateWorkspace(link.getAttribute('data-workspace-jump'));
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const hashTarget = window.location.hash ? window.location.hash.replace('#', '') : '';
+        const params = new URLSearchParams(window.location.search);
+        const initialWorkspace = hashTarget || (params.has('aksi') || params.has('filter') ? 'data-siswa' : 'dashboard');
+        activateWorkspace(initialWorkspace, false);
+        filterHasilTes();
+    });
+
+    window.addEventListener('hashchange', () => {
+        const hashTarget = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
+        activateWorkspace(hashTarget, false);
     });
     </script>
 </body>
