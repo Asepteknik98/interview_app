@@ -194,23 +194,69 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
 </head>
 <body class="bg-[#f8fafc] min-h-screen flex flex-col font-sans text-xs text-slate-700 antialiased">
 
-    <nav class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shadow-sm border-b border-slate-800">
-        <div class="flex items-center gap-3">
-            <div class="bg-white w-9 h-9 flex items-center justify-center rounded-xl shadow-sm overflow-hidden">
-                <img src="../assets/jb.png" alt="Logo SMK" class="w-full h-full object-contain">
+    <nav class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+        <div class="flex items-center gap-4">
+
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-900 to-sky-600 flex items-center justify-center shadow-lg overflow-hidden">
+                <img src="../assets/jb.png" class="w-10 h-10 object-contain">
             </div>
+
             <div>
-                <h1 class="text-sm font-black tracking-wider uppercase text-white flex items-center gap-2">
-                    PPDB CONTROL PANEL
-                    <img src="../assets/yayasan.png" alt="Yayasan" class="h-4 w-auto object-contain">
-                </h1>    
-                <p class="text-[10px] text-slate-400">SMK Jaya Buana</p>
+
+                <h1 class="text-xl font-black text-slate-800 tracking-wide">
+                    Dashboard Administrator
+                </h1>
+
+                <p class="text-sm text-slate-500">
+                    Sistem Diagnostik Minat & Bakat PPDB SMK Jaya Buana
+                </p>
+
             </div>
+
         </div>
-        <a href="../auth/logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem admin?')" class="bg-slate-800 hover:bg-rose-600 border border-slate-700/60 hover:border-rose-500 text-white font-bold px-3 py-2 rounded-xl transition-all duration-200 text-[10px] flex items-center gap-1.5 shadow-sm">
-            Log Out <i class="fa-solid fa-power-off text-[9px]"></i>
-        </a>
-    </nav>
+
+        <div class="flex items-center gap-5">
+
+            <div class="text-right">
+
+                <p class="text-xs text-slate-400">
+                    Login sebagai
+                </p>
+
+                <div class="flex items-center gap-2 justify-end">
+
+                    <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
+                        Administrator
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="text-right">
+
+                <div id="clock" class="font-bold text-slate-700 text-sm"></div>
+
+                <div id="today" class="text-xs text-slate-400"></div>
+
+            </div>
+
+            <a href="../auth/logout.php"
+                onclick="return confirm('Keluar dari dashboard?')"
+                class="bg-red-500 hover:bg-red-600 transition text-white px-4 py-2 rounded-xl font-semibold shadow">
+
+                <i class="fa-solid fa-right-from-bracket mr-2"></i>
+
+                Logout
+
+            </a>
+
+        </div>
+
+    </div>
+</nav>
 
     <main class="p-4 sm:p-6 max-w-7xl w-full mx-auto flex-grow space-y-5">
         
