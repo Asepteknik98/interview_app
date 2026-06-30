@@ -348,40 +348,231 @@ transform:scale(1.005);
 </div>
         <?= $notif; ?>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="admin.php?filter=" class="bg-white p-4 rounded-2xl shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)] border transition-all duration-300 flex items-center justify-between hover:translate-y-[-2px] hover:shadow-md cursor-pointer <?= empty($filter_status) ? 'border-blue-500 ring-4 ring-blue-50/50' : 'border-slate-100' ?>">
-                <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Pendaftar</span>
-                    <span class="text-xl font-black text-slate-800 mt-1 block font-mono"><?= number_format($count_total); ?></span>
-                </div>
-                <div class="w-10 h-10 bg-blue-50/60 text-blue-600 rounded-xl flex items-center justify-center text-sm border border-blue-100/50"><i class="fa-solid fa-users"></i></div>
-            </a>
-            
-            <a href="admin.php?filter=sudah" class="bg-white p-4 rounded-2xl shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)] border transition-all duration-300 flex items-center justify-between hover:translate-y-[-2px] hover:shadow-md cursor-pointer <?= $filter_status === 'sudah' ? 'border-emerald-500 ring-4 ring-emerald-50/50' : 'border-slate-100' ?>">
-                <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Sudah Selesai Tes</span>
-                    <span class="text-xl font-black text-emerald-600 mt-1 block font-mono"><?= number_format($count_sudah); ?></span>
-                </div>
-                <div class="w-10 h-10 bg-emerald-50/60 text-emerald-600 rounded-xl flex items-center justify-center text-sm border border-emerald-100/50"><i class="fa-solid fa-circle-check"></i></div>
-            </a>
-            
-            <a href="admin.php?filter=belum" class="bg-white p-4 rounded-2xl shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)] border transition-all duration-300 flex items-center justify-between hover:translate-y-[-2px] hover:shadow-md cursor-pointer <?= $filter_status === 'belum' ? 'border-amber-500 ring-4 ring-amber-50/50' : 'border-slate-100' ?>">
-                <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Menunggu Antrean</span>
-                    <span class="text-xl font-black text-amber-500 mt-1 block font-mono"><?= number_format($count_belum); ?></span>
-                </div>
-                <div class="w-10 h-10 bg-amber-50/60 text-amber-500 rounded-xl flex items-center justify-center text-sm border border-amber-100/50"><i class="fa-solid fa-clock-rotate-left"></i></div>
-            </a>
-            
-            <div class="bg-white p-4 rounded-2xl shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)] border border-slate-100 flex items-center justify-between select-none">
-                <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Progres Pengisian</span>
-                    <span class="text-xl font-black text-indigo-600 mt-1 block font-mono"><?= $persentase; ?>%</span>
-                </div>
-                <div class="w-10 h-10 bg-indigo-50/60 text-indigo-600 rounded-xl flex items-center justify-center text-sm border border-indigo-100/50"><i class="fa-solid fa-chart-pie"></i></div>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+
+    <!-- TOTAL SISWA -->
+    <a href="admin.php?filter="
+        class="card-hover relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 to-blue-900 text-white p-6 shadow-lg">
+
+        <div class="absolute -right-6 -bottom-6 opacity-10">
+
+            <i class="fa-solid fa-users text-[90px]"></i>
+
         </div>
 
+        <div class="relative">
+
+            <div class="flex justify-between items-start">
+
+                <div>
+
+                    <p class="uppercase text-xs tracking-widest text-blue-100">
+                        Total Pendaftar
+                    </p>
+
+                    <h2 class="text-4xl font-black mt-3">
+
+                        <?= number_format($count_total) ?>
+
+                    </h2>
+
+                </div>
+
+                <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+
+                    <i class="fa-solid fa-users text-2xl"></i>
+
+                </div>
+
+            </div>
+
+            <div class="mt-6 text-sm text-blue-100">
+
+                Semua akun siswa yang telah terdaftar.
+
+            </div>
+
+        </div>
+
+    </a>
+
+
+    <!-- SUDAH TES -->
+
+    <a href="admin.php?filter=sudah"
+        class="card-hover relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 to-emerald-700 text-white p-6 shadow-lg">
+
+        <div class="absolute -right-6 -bottom-6 opacity-10">
+
+            <i class="fa-solid fa-circle-check text-[90px]"></i>
+
+        </div>
+
+        <div class="relative">
+
+            <div class="flex justify-between">
+
+                <div>
+
+                    <p class="uppercase tracking-widest text-xs text-green-100">
+
+                        Sudah Tes
+
+                    </p>
+
+                    <h2 class="text-4xl font-black mt-3">
+
+                        <?= number_format($count_sudah) ?>
+
+                    </h2>
+
+                </div>
+
+                <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+
+                    <i class="fa-solid fa-check text-2xl"></i>
+
+                </div>
+
+            </div>
+
+            <div class="mt-6">
+
+                <div class="w-full bg-white/20 rounded-full h-2">
+
+                    <div
+                        class="bg-white h-2 rounded-full"
+                        style="width:<?= $persentase ?>%">
+                    </div>
+
+                </div>
+
+                <p class="text-green-100 text-sm mt-2">
+
+                    <?= $persentase ?>% telah menyelesaikan tes.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </a>
+
+
+    <!-- BELUM TES -->
+
+    <a href="admin.php?filter=belum"
+        class="card-hover relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 text-white p-6 shadow-lg">
+
+        <div class="absolute -right-6 -bottom-6 opacity-10">
+
+            <i class="fa-solid fa-hourglass-half text-[90px]"></i>
+
+        </div>
+
+        <div class="relative">
+
+            <div class="flex justify-between">
+
+                <div>
+
+                    <p class="uppercase tracking-widest text-xs">
+
+                        Belum Tes
+
+                    </p>
+
+                    <h2 class="text-4xl font-black mt-3">
+
+                        <?= number_format($count_belum) ?>
+
+                    </h2>
+
+                </div>
+
+                <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+
+                    <i class="fa-solid fa-clock text-2xl"></i>
+
+                </div>
+
+            </div>
+
+            <p class="mt-6 text-sm">
+
+                Menunggu pengerjaan tes.
+
+            </p>
+
+        </div>
+
+    </a>
+
+
+    <!-- PROGRESS -->
+
+    <div
+        class="card-hover relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-6 shadow-lg">
+
+        <div class="absolute -right-6 -bottom-6 opacity-10">
+
+            <i class="fa-solid fa-chart-line text-[90px]"></i>
+
+        </div>
+
+        <div class="relative">
+
+            <div class="flex justify-between">
+
+                <div>
+
+                    <p class="uppercase tracking-widest text-xs">
+
+                        Progress
+
+                    </p>
+
+                    <h2 class="text-4xl font-black mt-3">
+
+                        <?= $persentase ?>%
+
+                    </h2>
+
+                </div>
+
+                <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+
+                    <i class="fa-solid fa-chart-pie text-2xl"></i>
+
+                </div>
+
+            </div>
+
+            <div class="mt-6">
+
+                <div class="w-full h-2 rounded-full bg-white/20">
+
+                    <div
+                        class="h-2 rounded-full bg-white"
+                        style="width:<?= $persentase ?>%">
+                    </div>
+
+                </div>
+
+                <p class="mt-2 text-sm">
+
+                    Tingkat penyelesaian seluruh peserta.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
         <div id="modalEdit" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
             <div class="bg-white rounded-2xl shadow-xl p-5 max-w-sm w-full space-y-4 border border-slate-100 animate-fade-in">
                 <div class="flex justify-between items-center border-b pb-2.5">
