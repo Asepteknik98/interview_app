@@ -123,7 +123,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrator PPDB - SMK Jaya Buana</title>
+    <title>Administrator SPMB - SMK Jaya Buana</title>
     <link rel="icon" type="image/png" href="../assets/jb.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -368,19 +368,26 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                 padding: 6px !important;
             }
         }
+        /* Ensure touch targets are large enough on mobile */
+        .btn-primary, .btn-soft, .btn-danger, .btn-success { min-height: 48px; }
+
+        /* Responsive table -> card fallback for small screens */
+        .mobile-card { background:#fff; border:1px solid #e6eef8; border-radius:12px; padding:12px; box-shadow:0 6px 18px rgba(15,23,42,0.04); }
+        .mobile-card .meta { font-size:13px; color:#334155; }
+        .mobile-card .muted { font-size:12px; color:#64748b; }
     </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
     <div id="sidebarOverlay" class="fixed inset-0 z-40 hidden bg-slate-950/50 backdrop-blur-sm no-print lg:hidden"></div>
 
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-[#0F172A] text-white transition-transform duration-300 no-print lg:translate-x-0">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-[#0F172A] text-white transition-transform duration-300 no-print -translate-x-full lg:translate-x-0">
         <div class="flex h-full flex-col">
             <div class="flex items-center gap-3 border-b border-white/10 px-5 py-5">
                 <div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg">
                     <img src="../assets/jb.png" alt="Logo SMK Jaya Buana" class="h-9 w-9 object-contain">
                 </div>
                 <div class="min-w-0">
-                    <p class="text-sm font-black leading-tight">PPDB Admin</p>
+                    <p class="text-sm font-black leading-tight">SPMB Admin</p>
                     <p class="truncate text-xs font-medium text-slate-400">SMK Jaya Buana</p>
                 </div>
             </div>
@@ -418,7 +425,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                     </button>
                     <div class="min-w-0">
                         <h1 class="truncate text-lg font-black text-slate-900 sm:text-xl">Dashboard Administrator</h1>
-                        <p class="hidden text-sm font-medium text-slate-500 sm:block">Sistem Diagnostik Minat & Bakat PPDB</p>
+                        <p class="hidden text-sm font-medium text-slate-500 sm:block">Sistem Diagnostik Minat & Bakat SPMB</p>
                     </div>
                 </div>
 
@@ -446,17 +453,17 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                     </div>
                     <h2 id="workspaceTitle" class="mt-2 text-2xl font-black text-slate-900">Dashboard</h2>
                 </div>
-                <p id="workspaceSubtitle" class="max-w-xl text-sm font-medium leading-6 text-slate-500">Monitoring ringkas sistem diagnostik PPDB.</p>
+                <p id="workspaceSubtitle" class="max-w-xl text-sm font-medium leading-6 text-slate-500">Monitoring ringkas sistem diagnostik SPMB.</p>
             </div>
 
-            <section id="dashboard" class="workspace-section space-y-6" data-workspace-title="Dashboard" data-workspace-subtitle="Monitoring ringkas sistem diagnostik PPDB.">
+            <section id="dashboard" class="workspace-section space-y-6" data-workspace-title="Dashboard" data-workspace-subtitle="Monitoring ringkas sistem diagnostik SPMB.">
                 <div class="dashboard-hero overflow-hidden rounded-[28px] bg-gradient-to-br from-blue-700 via-blue-600 to-cyan-500 p-6 text-white shadow-xl sm:p-8">
                     <div class="grid gap-8 lg:grid-cols-[1.6fr_.9fr] lg:items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[.18em] text-blue-50">
                                 <i class="fa-solid fa-chart-line"></i> Administrator Dashboard
                             </div>
-                            <h2 class="mt-5 text-3xl font-black leading-tight sm:text-4xl">Ringkasan Diagnostik PPDB</h2>
+                            <h2 class="mt-5 text-3xl font-black leading-tight sm:text-4xl">Ringkasan Diagnostik SPMB</h2>
                             <p class="mt-3 max-w-2xl text-sm leading-7 text-blue-50 sm:text-base">Pantau progres tes, distribusi hasil, dan aktivitas administrasi tanpa perlu membuka seluruh data sekaligus.</p>
                             <div class="mt-7">
                                 <div class="mb-2 flex items-center justify-between text-sm font-bold">
@@ -602,11 +609,11 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                             </div>
                             <div class="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
                                 <span class="text-sm font-bold text-slate-600">Versi</span>
-                                <span class="text-sm font-black text-slate-800">2026</span>
+                                <span class="text-sm font-black text-slate-800">v1.0</span>
                             </div>
                             <div class="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
                                 <span class="text-sm font-bold text-slate-600">Developer</span>
-                                <span class="text-sm font-black text-slate-800">PPDB Web System</span>
+                                <span class="text-sm font-black text-slate-800">Asep Setiadi, S.Kom</span>
                             </div>
                         </div>
                     </div>
@@ -642,6 +649,12 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                         <i class="fa-solid fa-user-plus"></i> Daftarkan
                     </button>
                 </form>
+
+                <!-- Import from Excel button -->
+                <div class="mt-4">
+                    <button id="openImportModal" class="btn-soft px-4 py-3 text-sm"><i class="fa-solid fa-file-import mr-2"></i> Import dari Excel/CSV</button>
+                    <a href="../admin/import_template.csv" class="btn-soft px-4 py-3 text-sm ml-2"><i class="fa-solid fa-download mr-2"></i> Download Template</a>
+                </div>
             </section>
 
             <section id="data-siswa" class="workspace-section section-card printable-table hidden overflow-hidden" data-workspace-title="Data Siswa" data-workspace-subtitle="Kelola identitas siswa, pencarian, filter, export, edit akun, dan hapus akun.">
@@ -726,6 +739,9 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                     </table>
                 </div>
 
+                <!-- Mobile card view container for Data Siswa (visible on small screens) -->
+                <div id="dataSiswaCards" class="block md:hidden px-4 space-y-3"></div>
+
                 <div id="jsPaginationContainer" class="pagination-container flex flex-col gap-3 border-t border-slate-200 px-5 py-4 text-xs font-bold text-slate-500 sm:flex-row sm:items-center sm:justify-between no-print">
                     <span id="jsPaginationInfo">Menampilkan halaman 1</span>
                     <div class="flex flex-wrap gap-2" id="jsPaginationButtons"></div>
@@ -772,6 +788,12 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                             <div class="relative min-w-0 lg:w-80 no-print">
                                 <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                 <input type="text" id="hasilSearchInput" placeholder="Cari nama, NIS, kode, atau jurusan..." class="form-input pl-11">
+                            </div>
+                            <div class="flex items-center gap-3 no-print">
+                                <button id="exportHasilBtn" class="btn-success px-4 py-3 text-sm flex items-center gap-2" title="Export Excel Hasil Tes">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>Export Excel</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -826,7 +848,10 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                                 <tr id="hasilSearchEmptyRow" class="hidden"><td colspan="4" class="p-10 text-center font-medium italic text-slate-400">Data hasil tes yang Anda cari tidak ditemukan.</td></tr>
                             </tbody>
                         </table>
-                    </div>
+                            </div>
+
+                            <!-- Mobile card view container for Hasil Tes (visible on small screens) -->
+                            <div id="hasilTesCards" class="block md:hidden px-4 space-y-3"></div>
                 </div>
             </section>
 
@@ -920,7 +945,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
                         </div>
                         <div>
                             <p class="font-black text-slate-900">Administrator</p>
-                            <p class="text-sm font-medium text-slate-500">Hak akses penuh dashboard PPDB.</p>
+                            <p class="text-sm font-medium text-slate-500">Hak akses penuh dashboard SPMB.</p>
                         </div>
                     </div>
                 </div>
@@ -945,15 +970,15 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
 
                 <div class="section-card p-5 sm:p-6">
                     <h2 class="text-xl font-black text-slate-900">Tentang Sistem</h2>
-                    <p class="mt-4 text-sm font-medium leading-7 text-slate-600">Sistem Diagnostik Minat dan Bakat PPDB membantu administrator memantau peserta, mengelola akun, melihat hasil rekomendasi jurusan, dan membaca statistik distribusi minat.</p>
+                    <p class="mt-4 text-sm font-medium leading-7 text-slate-600">Sistem Diagnostik Minat dan Bakat SPMB membantu administrator memantau peserta, mengelola akun, melihat hasil rekomendasi jurusan, dan membaca statistik distribusi minat.</p>
                     <div class="mt-5 rounded-2xl bg-blue-50 p-4 text-sm font-bold text-blue-700">
-                        <i class="fa-solid fa-code mr-2"></i> Developer: PPDB Web System
+                        <i class="fa-solid fa-code mr-2"></i> Developer: Asep Setiadi, S.Kom
                     </div>
                 </div>
             </section>
         </main>
 
-        <footer class="border-t border-slate-200 bg-white px-4 py-5 text-center text-xs font-bold text-slate-400">&copy; 2026 PPDB Web System &bull; SMK Jaya Buana</footer>
+        <footer class="border-t border-slate-200 bg-white px-4 py-5 text-center text-xs font-bold text-slate-400">&copy; 2026 SPMB Web System &bull; SMK Jaya Buana</footer>
     </div>
 
     <div id="modalEdit" class="fixed inset-0 z-[70] flex hidden items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
@@ -990,6 +1015,34 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
         </div>
     </div>
 
+    <!-- Import Modal -->
+    <div id="importModal" class="fixed inset-0 z-[75] flex hidden items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+        <div class="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl animate-fade-in">
+            <div class="mb-4 flex items-center justify-between border-b border-slate-200 pb-3">
+                <div>
+                    <h4 class="text-base font-black text-slate-900"><i class="fa-solid fa-file-import mr-2 text-green-600"></i> Import Siswa dari Excel / CSV</h4>
+                    <p class="mt-1 text-xs font-medium text-slate-500">Format: username,nama_lengkap,password(optional). Jika password kosong, akan diset sama seperti username.</p>
+                </div>
+                <button onclick="closeImportModal()" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200" title="Tutup modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="importForm" action="../admin/import_siswa_excel.php" method="POST" enctype="multipart/form-data">
+                <div class="space-y-3">
+                    <div>
+                        <label class="mb-2 block text-xs font-black uppercase tracking-[.14em] text-slate-500">Pilih file (xlsx, xls, csv)</label>
+                        <input type="file" name="import_file" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" required class="form-input">
+                    </div>
+                    <div class="text-sm text-slate-500">Contoh kolom CSV/XLSX: <strong>username,nama_lengkap,password</strong></div>
+                        <div class="flex gap-3 pt-2">
+                        <button type="button" onclick="closeImportModal()" class="btn-soft px-4 py-3 text-sm">Batal</button>
+                        <button type="submit" id="importSubmitBtn" class="btn-primary px-4 py-3 text-sm">Mulai Import</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
     function bukaModal(id, username, nama) {
         document.getElementById('modal_id').value = id;
@@ -999,6 +1052,54 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
     }
     function tutupModal() { 
         document.getElementById('modalEdit').classList.add('hidden'); 
+    }
+
+    function openImportModal() {
+        document.getElementById('importModal').classList.remove('hidden');
+    }
+    function closeImportModal() {
+        document.getElementById('importModal').classList.add('hidden');
+    }
+
+    const openImportBtn = document.getElementById('openImportModal');
+    if (openImportBtn) openImportBtn.addEventListener('click', function(e){ e.preventDefault(); openImportModal(); });
+
+    // AJAX import submission
+    const importForm = document.getElementById('importForm');
+    if (importForm) {
+        importForm.addEventListener('submit', function(e){
+            e.preventDefault();
+            const fileInput = importForm.querySelector('input[name="import_file"]');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                alert('Pilih file untuk diimport.');
+                return;
+            }
+            const btn = document.getElementById('importSubmitBtn');
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengimpor...';
+
+            const formData = new FormData();
+            formData.append('import_file', fileInput.files[0]);
+
+            fetch(importForm.action, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+                body: formData
+            }).then(r => r.json()).then(data => {
+                btn.disabled = false; btn.innerHTML = 'Mulai Import';
+                closeImportModal();
+                if (data && data.summary) {
+                    alert('Import selesai. Berhasil: ' + data.summary.imported + ', Dilewati: ' + data.summary.skipped);
+                    // optionally reload to reflect new rows
+                    window.location.reload();
+                } else {
+                    alert('Import selesai, periksa hasil di halaman ringkasan.');
+                }
+            }).catch(err => {
+                console.error(err);
+                btn.disabled = false; btn.innerHTML = 'Mulai Import';
+                alert('Terjadi kesalahan saat mengimpor.');
+            });
+        });
     }
 
     // NEW PREMIUM FUNCTION: QUICK COPY FOR WHATSAPP
@@ -1305,6 +1406,145 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
         const hashTarget = window.location.hash ? window.location.hash.replace('#', '') : 'dashboard';
         activateWorkspace(hashTarget, false);
     });
+
+    // Export Excel for Hasil Tes
+    (function(){
+        const exportBtn = document.getElementById('exportHasilBtn');
+        const searchInput = document.getElementById('hasilSearchInput');
+        const currentFilter = <?= json_encode($filter_status); ?>;
+
+        function showLoading() {
+            let el = document.getElementById('exportLoadingOverlay');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'exportLoadingOverlay';
+                el.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-black/40';
+                el.innerHTML = `<div class="rounded-lg bg-white p-6 text-center shadow-lg">
+                    <div class="flex items-center justify-center gap-3">
+                        <svg class="animate-spin h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                        <div class="text-sm font-bold">Mengekspor data, mohon tunggu...</div>
+                    </div>
+                </div>`;
+                document.body.appendChild(el);
+            }
+            el.classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            const el = document.getElementById('exportLoadingOverlay');
+            if (el) el.classList.add('hidden');
+        }
+
+        function notify(message, success = true) {
+            alert(message);
+        }
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', async function(e){
+                e.preventDefault();
+                const q = searchInput ? searchInput.value.trim() : '';
+                const url = `../admin/export_hasil_tes_excel.php?filter=${encodeURIComponent(currentFilter)}&q=${encodeURIComponent(q)}`;
+                try {
+                    showLoading();
+                    const resp = await fetch(url, { credentials: 'same-origin' });
+                    const contentType = resp.headers.get('Content-Type') || '';
+                    if (!resp.ok) {
+                        const txt = await resp.text();
+                        notify('Gagal mengekspor: ' + txt, false);
+                        hideLoading();
+                        return;
+                    }
+                    if (contentType.indexOf('application/json') !== -1) {
+                        const data = await resp.json();
+                        notify(data.message || 'Tidak ada data hasil tes untuk diekspor.', false);
+                        hideLoading();
+                        return;
+                    }
+                    const blob = await resp.blob();
+                    const filename = resp.headers.get('X-Filename') || `Hasil_Tes_PPDB_${new Date().toISOString().slice(0,10)}.xlsx`;
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    URL.revokeObjectURL(link.href);
+                    notify('Export berhasil. File akan diunduh.');
+                } catch (err) {
+                    console.error(err);
+                    notify('Terjadi kesalahan saat mengekspor. Cek konsol untuk detail.', false);
+                } finally {
+                    hideLoading();
+                }
+            });
+        }
+    })();
+    // Mobile cards: build lightweight card view from visible table rows
+    function refreshMobileCards() {
+        const isMobile = window.innerWidth < 768;
+
+        const dataContainer = document.getElementById('dataSiswaCards');
+        if (dataContainer) {
+            if (!isMobile) { dataContainer.innerHTML = ''; }
+            else {
+                const rows = Array.from(document.querySelectorAll('#siswaDataTable tbody tr')).filter(r => !r.classList.contains('hidden'));
+                if (rows.length === 0) { dataContainer.innerHTML = '<div class="p-4 text-sm italic text-slate-400">Tidak ada data pendaftar.</div>'; }
+                else {
+                    let out = '';
+                    rows.forEach(row => {
+                        if (row.id === 'noDataRow' || row.id === 'liveSearchEmptyRow') return;
+                        const nama = (row.querySelector('td:nth-child(1) .block')||{innerText:''}).innerText.trim();
+                        const nis = (row.querySelector('td:nth-child(1) .font-mono')||{innerText:''}).innerText.trim();
+                        const status = (row.querySelector('td:nth-child(2)')||{innerText:''}).innerText.trim();
+                        const info = (row.querySelector('td:nth-child(3)')||{innerHTML:''}).innerHTML;
+                        const aksi = (row.querySelector('td:last-child')||{innerHTML:''}).innerHTML;
+                        out += `<div class="mobile-card">
+                            <div class="flex items-center justify-between">
+                                <div><div class="meta font-black">${nama}</div><div class="muted">${nis}</div></div>
+                                <div class="muted text-right">${status}</div>
+                            </div>
+                            <div class="mt-3 muted">${info}</div>
+                            <div class="mt-3 flex gap-2">${aksi}</div>
+                        </div>`;
+                    });
+                    dataContainer.innerHTML = out;
+                }
+            }
+        }
+
+        const hasilContainer = document.getElementById('hasilTesCards');
+        if (hasilContainer) {
+            if (!isMobile) { hasilContainer.innerHTML = ''; }
+            else {
+                const rows = Array.from(document.querySelectorAll('#hasilTesTableBody tr')).filter(r => !r.classList.contains('hidden'));
+                if (rows.length === 0) { hasilContainer.innerHTML = '<div class="p-4 text-sm italic text-slate-400">Tidak ada data hasil tes.</div>'; }
+                else {
+                    let out = '';
+                    rows.forEach(row => {
+                        if (row.id === 'hasilSearchEmptyRow') return;
+                        const nama = (row.querySelector('td:nth-child(1) .block')||{innerText:''}).innerText.trim();
+                        const nis = (row.querySelector('td:nth-child(1) .font-mono')||{innerText:''}).innerText.trim();
+                        const kode = (row.querySelector('td:nth-child(2)')||{innerText:''}).innerText.trim();
+                        const rekom = (row.querySelector('td:nth-child(3)')||{innerHTML:''}).innerHTML;
+                        const aksi = (row.querySelector('td:last-child')||{innerHTML:''}).innerHTML;
+                        out += `<div class="mobile-card">
+                            <div class="flex items-center justify-between">
+                                <div><div class="meta font-black">${nama}</div><div class="muted">${nis}</div></div>
+                                <div class="muted text-right font-mono">${kode}</div>
+                            </div>
+                            <div class="mt-3 muted">${rekom}</div>
+                            <div class="mt-3 flex gap-2">${aksi}</div>
+                        </div>`;
+                    });
+                    hasilContainer.innerHTML = out;
+                }
+            }
+        }
+    }
+
+    window.addEventListener('resize', refreshMobileCards);
+    // refresh now
+    refreshMobileCards();
     </script>
 </body>
 </html>
