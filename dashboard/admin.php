@@ -97,14 +97,14 @@ if ($siswa_result) {
 
 // MATRIKS REF
 $matriks_riasec = [
-    ["no" => 1, "jurusan" => "Teknik Komputer Jaringan (TKJ)", "kode" => "IRC, ICR, RIC, IRC, CRI", "ket" => "Mengutak-atik komputer, jaringan, memecahkan masalah teknis, teliti, dan suka teknologi."],
-    ["no" => 2, "jurusan" => "Teknik Sepeda Motor", "kode" => "RCI, RIC, RCI, CRI, IRC", "ket" => "Membongkar pasang motor, servis, kerja di bengkel, praktis, dan suka kendaraan roda dua."],
+    ["no" => 1, "jurusan" => "Teknik Komputer Jaringan (TKJ)", "kode" => "IRC, ICR, RIC, CRI", "ket" => "Mengutak-atik komputer, jaringan, memecahkan masalah teknis, teliti, dan suka teknologi."],
+    ["no" => 2, "jurusan" => "Teknik Sepeda Motor", "kode" => "RIC, RCI, CRI, IRC", "ket" => "Membongkar pasang motor, servis, kerja di bengkel, praktis, dan suka kendaraan roda dua."],
     ["no" => 3, "jurusan" => "Teknik Pengelasan", "kode" => "RCI, RIC, RC, RE, CRI", "ket" => "Kuat fisik, suka las, fabrikasi logam, tahan panas & kotor, dan teliti dalam hasil las."],
     ["no" => 4, "jurusan" => "Teknik Bodi Kendaraan Ringan", "kode" => "RAC, RAI, RCI, ARC, RIC", "ket" => "Memperbaiki body mobil, mengecat, desain tampilan, kerja tangan + ada unsur seni."],
     ["no" => 5, "jurusan" => "Teknik Instalasi Tenaga Listrik (TITL)", "kode" => "RIC, IRC, RCI, ICR, CRI", "ket" => "Menginstalasi listrik gedung, panel, rangkaian, safety, dan troubleshooting masalah listrik."],
     ["no" => 6, "jurusan" => "Teknik Tata & Pendingin Udara", "kode" => "RIC, IRC, RCI, ICR, CRI", "ket" => "Memasang AC, sistem pendingin, kombinasi mekanik + listrik, dan suka troubleshooting."],
     ["no" => 7, "jurusan" => "Desain Produksi Busana", "kode" => "ARC, ARI, ARE, RAC, AIC", "ket" => "Kreatif, suka mendesain baju, membuat pola, menjahit, dan tertarik dunia fashion."],
-    ["no" => 8, "jurusan" => "Teknik Kimia Industri", "kode" => "ICR, IRC, ICR, CIR, RIC", "ket" => "Menyukai kimia, praktik di laboratorium, perhitungan, quality control, dan mengikuti prosedur."],
+    ["no" => 8, "jurusan" => "Teknik Kimia Industri", "kode" => "IRC, ICR, CIR, RIC", "ket" => "Menyukai kimia, praktik di laboratorium, perhitungan, quality control, dan mengikuti prosedur."],
     ["no" => 9, "jurusan" => "Desain Teknik Furnitur", "kode" => "ARC, ARI, ACR, RAC, AIC", "ket" => "Kreatif, mendesain mebel, gambar teknik 3D, woodworking, dan suka estetika interior."],
     ["no" => 10, "jurusan" => "Teknik Pemesinan", "kode" => "RIC, RCI, IRC, ICR, CRI", "ket" => "Mengoperasikan mesin bubut, milling, CNC, presisi tinggi, dan manufaktur."]
 ];

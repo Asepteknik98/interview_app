@@ -28,85 +28,226 @@ $user_id = $_SESSION['id'];
 $cek_hasil = $conn->query("SELECT * FROM hasil_ujian WHERE user_id = '$user_id' LIMIT 1");
 $sudah_ujian = ($cek_hasil->num_rows > 0) ? $cek_hasil->fetch_assoc() : false;
 
+$debug_riasec = null;
+if (!empty($_SESSION['debug_riasec'])) {
+    $debug_riasec = $_SESSION['debug_riasec'];
+    unset($_SESSION['debug_riasec']);
+}
+
+function getBiasAdjustment(array $sorted_skor, string $jurusan_name): float {
+    arsort($sorted_skor);
+    $keys = array_keys($sorted_skor);
+    $values = array_values($sorted_skor);
+    $primary = $keys[0] ?? '';
+    $secondary = $keys[1] ?? '';
+    $tertiary = $keys[2] ?? '';
+    $top_value = $values[0] ?? 0;
+    $second_value = $values[1] ?? 0;
+    $third_value = $values[2] ?? 0;
+    $bonus = 0.0;
+
+    $rc_ratio = $top_value > 0 ? $second_value / $top_value : 0;
+    $cc_ratio = $second_value > 0 ? $third_value / $second_value : 0;
+
+    if ($primary === 'R' && $secondary === 'I' && $tertiary === 'C') {
+        if ($third_value < $second_value * 0.7) {
+            if (in_array($jurusan_name, ['Teknik Sepeda Motor (TSM)', 'Teknik Pengelasan', 'Teknik Pemesinan (TPM)'], true)) {
+                $bonus = 5.0;
+            }
+            if ($jurusan_name === 'Teknik Komputer Jaringan (TKJ)') {
+                $bonus = -4.0;
+            }
+        } else {
+            if ($jurusan_name === 'Teknik Komputer Jaringan (TKJ)') {
+                $bonus = 2.0;
+            }
+            if ($jurusan_name === 'Teknik Kimia Industri') {
+                $bonus = 2.0;
+            }
+        }
+    }
+
+    if ($primary === 'R' && $secondary === 'C') {
+        if (in_array($jurusan_name, ['Teknik Instalasi Tenaga Listrik (TITL)', 'Teknik Tata & Pendingin Udara (TTPU)'], true)) {
+            $bonus = 5.0;
+        }
+        if ($jurusan_name === 'Teknik Komputer Jaringan (TKJ)') {
+            $bonus = -3.0;
+        }
+    }
+
+    if (($primary === 'A' && $secondary === 'R') || ($primary === 'R' && $secondary === 'A')) {
+        if (in_array($jurusan_name, ['Desain Produksi Busana', 'Desain Teknik Furnitur'], true)) {
+            $bonus = 5.0;
+        }
+        if (in_array($jurusan_name, ['Teknik Komputer Jaringan (TKJ)', 'Teknik Kimia Industri'], true)) {
+            $bonus = -2.0;
+        }
+    }
+
+    if (($primary === 'I' && $secondary === 'C') || ($primary === 'C' && $secondary === 'I')) {
+        if (in_array($jurusan_name, ['Teknik Komputer Jaringan (TKJ)', 'Teknik Kimia Industri'], true)) {
+            $bonus = 5.0;
+        }
+    }
+
+    if ($jurusan_name === 'Teknik Komputer Jaringan (TKJ)' && !in_array('I', [$primary, $secondary], true)) {
+        $bonus -= 3.0;
+    }
+
+    if ($jurusan_name === 'Teknik Komputer Jaringan (TKJ)' && !in_array('C', [$primary, $secondary], true)) {
+        $bonus -= 2.0;
+    }
+
+    return $bonus;
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_asesmen']) && !$sudah_ujian) {
     $jawaban_siswa = $_POST['skala'] ?? [];
-    $skor_riasec = ['R' => 0, 'I' => 0, 'A' => 0, 'S' => 0, 'E' => 0, 'C' => 0];
+    $skor_riasec = ['R' => 0, 'I' => 0, 'A' => 0, 'E' => 0, 'C' => 0];
+    $debug_log = [
+        'skor_per_kategori' => [],
+        'kode_user' => '',
+        'nama_jurusan' => [],
+    ];
 
-    // 1. Hitung total skor dari 18 pertanyaan riil
+    // 1. Hitung total skor dari semua pertanyaan RIASEC (tanpa S)
     $all_soal = $conn->query("SELECT id, kategori_riasec FROM soal_diagnostik");
     while ($s = $all_soal->fetch_assoc()) {
         $poin = isset($jawaban_siswa[$s['id']]) ? intval($jawaban_siswa[$s['id']]) : 0;
-        $skor_riasec[$s['kategori_riasec']] += $poin;
+        if (isset($skor_riasec[$s['kategori_riasec']])) {
+            $skor_riasec[$s['kategori_riasec']] += $poin;
+        }
     }
 
-    // 2. Ambil 3 Huruf Tertinggi (Contoh Hasil: ISC)
-    arsort($skor_riasec);
-    $top_3_keys = array_slice(array_keys($skor_riasec), 0, 3);
+    // 2. Kode siswa dibuat dari 3 kategori tertinggi tanpa S
+    $sorted_skor = $skor_riasec;
+    arsort($sorted_skor);
+    $top_3_keys = array_slice(array_keys($sorted_skor), 0, 3);
     $kode_user = implode('', $top_3_keys);
+    $user_letters = str_split($kode_user);
+    $debug_log['skor_per_kategori'] = $skor_riasec;
+    $debug_log['kode_user'] = $kode_user;
 
-    // Pecah huruf user menjadi array: ['I', 'S', 'C']
-    $array_huruf_user = str_split($kode_user);
-
-    // 3. Logika Scoring Baru: Hitung Kedekatan Karakter Secara Mutlak dengan Gambar Panduan
-    $matriks_jurusan = [];
-    $get_jurusan = $conn->query("SELECT * FROM master_jurusan");
+    // 3. Hitung skor untuk setiap jurusan berdasarkan semua kombinasi kode yang tersedia
+    $jurusan_candidates = [];
+    $max_original_sum = 0;
+    $get_jurusan = $conn->query("SELECT id, nama_jurusan, kode_riasec_list, keterangan FROM master_jurusan");
 
     while ($j = $get_jurusan->fetch_assoc()) {
-        // Bersihkan spasi dan pecah 5 kode RIASEC bawaan jurusan di database
         $clean_list = str_replace(' ', '', $j['kode_riasec_list']);
-        $kode_jurusan_arr = explode(',', $clean_list);
+        $kode_jurusan_arr = array_filter(array_map('trim', explode(',', $clean_list)), function($item) {
+            return $item !== '';
+        });
 
-        $bobot_tertinggi_jurusan = 0;
+        $total_codes = count($kode_jurusan_arr);
+        foreach ($kode_jurusan_arr as $index => $kode_jurusan) {
+            $jurusan_letters = str_split($kode_jurusan);
+            $temp_letters = $jurusan_letters;
+            $common_letters = 0;
 
-        foreach ($kode_jurusan_arr as $kj) {
-            $skor_cocok = 0;
-            $array_huruf_jurusan = str_split($kj);
-
-            // ATURAN 1: Cocok Sempurna 3 Huruf Posisi Sama (Skor Tertinggi)
-            if ($kj === $kode_user) {
-                $skor_cocok += 200;
-            }
-            // ATURAN 2: Dua Huruf Pertama Cocok Persis (Sesuai Panduan No. 2 pada Gambar)
-            elseif (substr($kode_user, 0, 2) === substr($kj, 0, 2)) {
-                $skor_cocok += 100;
-            }
-            // ATURAN 3: Satu Huruf Pertama (Minat Terkuat) Cocok Persis
-            elseif (substr($kode_user, 0, 1) === substr($kj, 0, 1)) {
-                $skor_cocok += 50;
+            foreach ($user_letters as $letter) {
+                $pos = array_search($letter, $temp_letters);
+                if ($pos !== false) {
+                    $common_letters++;
+                    unset($temp_letters[$pos]);
+                }
             }
 
-            // ATURAN 4: Hitung jumlah huruf yang beririsan tanpa melihat urutan (Sangat penting untuk kasus seperti ISC)
-            $irisan = array_intersect($array_huruf_user, $array_huruf_jurusan);
-            $skor_cocok += count($irisan) * 10; // Menambah bobot kemiripan elemen kepribadian
+            $position_same = 0;
+            foreach ($jurusan_letters as $idx => $letter) {
+                if (isset($user_letters[$idx]) && $user_letters[$idx] === $letter) {
+                    $position_same++;
+                }
+            }
 
-            // Ambil nilai loop terbaik untuk jurusan ini
-            if ($skor_cocok > $bobot_tertinggi_jurusan) {
-                $bobot_tertinggi_jurusan = $skor_cocok;
+            $same_order = ($kode_jurusan === $kode_user) ? 1 : 0;
+            $raw_original_sum = 0;
+            foreach ($jurusan_letters as $letter) {
+                if (isset($skor_riasec[$letter])) {
+                    $raw_original_sum += $skor_riasec[$letter];
+                }
+            }
+
+            $max_original_sum = max($max_original_sum, $raw_original_sum);
+            $jurusan_candidates[$j['id']]['nama'] = $j['nama_jurusan'];
+            $jurusan_candidates[$j['id']]['keterangan'] = $j['keterangan'];
+            $jurusan_candidates[$j['id']]['codes'][] = [
+                'kode' => $kode_jurusan,
+                'common_letters' => $common_letters,
+                'position_same' => $position_same,
+                'same_order' => $same_order,
+                'raw_original_sum' => $raw_original_sum,
+                'priority' => $total_codes > 0 ? ($total_codes - $index) / $total_codes : 1.0,
+            ];
+        }
+    }
+
+    $matriks_jurusan = [];
+    foreach ($jurusan_candidates as $jurusan_id => $jurusan_data) {
+        $best_score = -1;
+        $best_code = null;
+        $best_detail = null;
+
+        foreach ($jurusan_data['codes'] as $code_data) {
+            $user_len = max(1, count($user_letters));
+            $letter_component = ($code_data['common_letters'] / $user_len) * 35;
+            $position_component = ($code_data['position_same'] / $user_len) * 25;
+            $order_bonus = $code_data['same_order'] ? 10.0 : 0.0;
+            $original_component = ($max_original_sum > 0) ? ($code_data['raw_original_sum'] / $max_original_sum) * 25 : 0;
+            $priority_boost = $code_data['priority'] * 5.0;
+            $final_score = $letter_component + $position_component + $original_component + $order_bonus + $priority_boost;
+
+            if ($final_score > $best_score) {
+                $best_score = $final_score;
+                $best_code = $code_data['kode'];
+                $best_detail = [
+                    'letter_component' => round($letter_component, 2),
+                    'position_component' => round($position_component, 2),
+                    'order_bonus' => round($order_bonus, 2),
+                    'original_component' => round($original_component, 2),
+                    'priority_boost' => round($priority_boost, 2),
+                    'final_score' => round($final_score, 2),
+                    'common_letters' => $code_data['common_letters'],
+                    'position_same' => $code_data['position_same'],
+                    'same_order' => $code_data['same_order'],
+                    'raw_original_sum' => $code_data['raw_original_sum'],
+                ];
             }
         }
 
+        $bias_bonus = getBiasAdjustment($sorted_skor, $jurusan_data['nama']);
+        $final_best_score = $best_score + $bias_bonus;
         $matriks_jurusan[] = [
-            'nama' => $j['nama_jurusan'],
-            'ket' => $j['keterangan'],
-            'total_bobot' => $bobot_tertinggi_jurusan
+            'nama' => $jurusan_data['nama'],
+            'ket' => $jurusan_data['keterangan'],
+            'kode_terbaik' => $best_code,
+            'best_score' => $final_best_score,
+            'bias_bonus' => round($bias_bonus, 2),
+            'detail' => $best_detail,
         ];
     }
 
-    // Urutkan peringkat jurusan berdasarkan total bobot dari yang paling relevan
     usort($matriks_jurusan, function($a, $b) {
-        return $b['total_bobot'] <=> $a['total_bobot'];
+        return $b['best_score'] <=> $a['best_score'];
     });
 
-    // Ambil 3 Jurusan Teratas Hasil Perhitungan Karakter Mutlak
     $rekomendasi_1 = isset($matriks_jurusan[0]) ? $matriks_jurusan[0]['nama'] : 'Teknik Komputer Jaringan (TKJ)';
     $rekomendasi_2 = isset($matriks_jurusan[1]) ? $matriks_jurusan[1]['nama'] : 'Teknik Kimia Industri';
     $rekomendasi_3 = isset($matriks_jurusan[2]) ? $matriks_jurusan[2]['nama'] : 'Teknik Instalasi Tenaga Listrik (TITL)';
 
-    // Masukkan Opsi 2 dan Opsi 3 ke dalam string pemisah agar struktur database aman
     $alternatif_gabungan = "Opsi 2: " . $rekomendasi_2 . " | Opsi 3: " . $rekomendasi_3;
 
-    // Simpan hasil riil tanpa ada istilah "General Vocational" lagi
+    $debug_log['nama_jurusan'] = array_map(function($item) {
+        return [
+            'nama' => $item['nama'],
+            'best_code' => $item['kode_terbaik'],
+            'best_score' => round($item['best_score'], 2),
+            'detail' => $item['detail'],
+        ];
+    }, $matriks_jurusan);
+    $_SESSION['debug_riasec'] = $debug_log;
+
     $stmt = $conn->prepare("INSERT INTO hasil_ujian (user_id, kombinasi_kode, rekomendasi_jurusan, keterangan_jurusan) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("isss", $user_id, $kode_user, $rekomendasi_1, $alternatif_gabungan);
     $stmt->execute();
@@ -195,7 +336,152 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
 
         .question-dot.active {
             border-color: #2563eb;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, .14);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .14);
+        }
+
+        @media (max-width: 880px) {
+            .soft-card {
+                padding: 0.75rem;
+                border-radius: 1.15rem;
+                box-shadow: 0 6px 18px rgba(15, 23, 42, .05);
+            }
+
+            .question-card {
+                padding: 0.75rem;
+                margin-bottom: 0.75rem;
+                border: 1px solid #e2e8f0;
+            }
+
+            .answer-card {
+                min-height: 5.8rem;
+                padding: 0.75rem;
+            }
+
+            .answer-card span {
+                font-size: 0.92rem;
+            }
+
+            .question-status-label {
+                font-size: 0.7rem;
+            }
+
+            .question-dot {
+                width: 2.1rem;
+                height: 2.1rem;
+                font-size: 0.7rem;
+            }
+
+            .soft-card h2,
+            .soft-card h3,
+            .soft-card h4 {
+                line-height: 1.2;
+            }
+
+            .soft-card p,
+            .soft-card .text-sm,
+            .soft-card .text-xs {
+                font-size: 0.86rem;
+            }
+
+            .bg-blue-55 {
+                background-color: #eff6ff;
+            }
+
+            .hidden-on-mobile {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                background: #fafafa;
+            }
+
+            nav {
+                padding-top: 0.65rem;
+                padding-bottom: 0.65rem;
+            }
+
+            .soft-card {
+                padding: 0.65rem;
+                border-radius: 1rem;
+                box-shadow: none;
+            }
+
+            .question-card {
+                padding: 0.65rem;
+                margin-bottom: 0.65rem;
+                border: 1px solid #e5e7eb;
+            }
+
+            .question-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .question-card .mb-6 {
+                margin-bottom: 0.8rem;
+            }
+
+            .answer-card {
+                min-height: 5rem;
+                padding: 0.6rem;
+                border-radius: 16px;
+            }
+
+            .answer-card span {
+                font-size: 0.86rem;
+            }
+
+            .answer-row {
+                display: flex;
+                gap: 0.45rem;
+                overflow-x: auto;
+                padding-bottom: 0.4rem;
+                margin: 0 -0.4rem;
+                padding-left: 0.4rem;
+            }
+
+            .answer-row label {
+                min-width: 80px;
+                flex: 0 0 auto;
+            }
+
+            .answer-row::-webkit-scrollbar {
+                height: 5px;
+            }
+
+            .answer-row::-webkit-scrollbar-thumb {
+                background: rgba(37, 99, 235, 0.35);
+                border-radius: 999px;
+            }
+
+            .answer-dot {
+                width: 1.9rem;
+                height: 1.9rem;
+                font-size: .64rem;
+            }
+
+            .question-status-label {
+                display: none;
+            }
+
+            .progress-sticky {
+                position: sticky;
+                top: 0;
+                z-index: 30;
+            }
+
+            .grid.gap-5 {
+                gap: 0.9rem;
+            }
+
+            .grid.gap-0 {
+                gap: 0;
+            }
+
+            .text-3xl {
+                font-size: 1.55rem;
+            }
         }
 
         @keyframes fadeIn {
@@ -287,6 +573,37 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                                 <i class="fa-solid fa-chart-simple"></i> Kecocokan utama sistem
                             </div>
                         </div>
+                        <?php if (!empty($debug_riasec)): ?>
+                            <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700 hidden sm:block">
+                                <div class="mb-3 font-black uppercase tracking-[.18em] text-slate-500">Debug Perhitungan Skor</div>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-2xl bg-slate-50 p-3">
+                                        <div class="font-black text-slate-800">Skor Kategori</div>
+                                        <ul class="mt-2 space-y-1 text-xs text-slate-600">
+                                            <?php foreach ($debug_riasec['skor_per_kategori'] as $letter => $score): ?>
+                                                <li><?= htmlspecialchars($letter); ?>: <?= intval($score); ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                    <div class="rounded-2xl bg-slate-50 p-3">
+                                        <div class="font-black text-slate-800">Kode Siswa</div>
+                                        <div class="mt-2 text-lg font-black text-slate-900"><?= htmlspecialchars($debug_riasec['kode_user']); ?></div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 rounded-2xl bg-slate-50 p-3">
+                                    <div class="font-black text-slate-800">Skor Jurusan Teratas</div>
+                                    <div class="mt-3 space-y-3 text-xs text-slate-600">
+                                        <?php foreach (array_slice($debug_riasec['nama_jurusan'], 0, 4) as $jur): ?>
+                                            <div class="rounded-2xl border border-slate-200 bg-white p-3">
+                                                <div class="font-bold text-slate-900"><?= htmlspecialchars($jur['nama']); ?> (<?= htmlspecialchars($jur['best_code']); ?>)</div>
+                                                <div class="mt-1">Skor: <?= htmlspecialchars($jur['best_score']); ?> <span class="text-slate-400">(bias: <?= htmlspecialchars($jur['bias_bonus']); ?>)</span></div>
+                                                <div class="mt-1 text-[11px] text-slate-500">Huruf cocok: <?= htmlspecialchars($jur['detail']['common_letters']); ?>, posisi benar: <?= htmlspecialchars($jur['detail']['position_same']); ?>, urutan sama: <?= htmlspecialchars($jur['detail']['same_order']); ?>, RIASEC asli: <?= htmlspecialchars($jur['detail']['raw_original_sum']); ?></div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="soft-card p-6 sm:p-7">
@@ -333,7 +650,7 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                             <h2 class="mt-5 text-3xl font-black leading-tight text-slate-900">Selamat Datang, <?= htmlspecialchars($nama_lengkap); ?></h2>
                             <p class="mt-4 max-w-2xl text-sm font-medium leading-7 text-slate-600">Silakan jawab seluruh pertanyaan sesuai dengan kondisi dan minat Anda. Tidak ada jawaban benar atau salah. Hasil akan digunakan sebagai rekomendasi jurusan yang paling sesuai.</p>
                         </div>
-                        <div class="flex items-center justify-center bg-blue-55 p-6">
+                        <div class="hidden md:flex items-center justify-center bg-blue-55 p-6">
                             <div class="relative h-40 w-40">
                                 <div class="absolute inset-0 rounded-[2rem] bg-blue-600 rotate-6"></div>
                                 <div class="absolute inset-0 rounded-[2rem] bg-white p-5 shadow-xl">
@@ -369,11 +686,11 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                 </div>
             </section>
 
-            <section class="sticky top-[73px] z-30 mb-6 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur-xl">
+            <section class="sticky top-[73px] z-30 mb-6 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur-xl progress-sticky">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0 flex-1">
                         <div class="mb-2 flex items-center justify-between gap-4">
-                            <p class="text-xs font-black uppercase tracking-[.16em] text-slate-500">Progress Pengerjaan</p>
+                            <p class="text-xs font-black uppercase tracking-[.16em] text-slate-500">Progress</p>
                             <p id="progressPercent" class="text-sm font-black text-blue-700">0%</p>
                         </div>
                         <div class="h-3 overflow-hidden rounded-full bg-slate-100">
@@ -399,14 +716,14 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                             </span>
                         </div>
 
-                        <div class="grid gap-3 sm:grid-cols-5">
+                        <div class="answer-row grid gap-3 sm:grid-cols-5">
                             <?php for($i=1; $i<=5; $i++): ?>
-                                <label class="cursor-pointer">
+                                <label class="cursor-pointer min-w-[90px]">
                                     <input type="radio" name="skala[<?= $s['id']; ?>]" value="<?= $i; ?>" required class="peer hidden">
-                                    <div class="answer-card flex min-h-[92px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 text-center font-black text-slate-500">
-                                        <i class="check-icon fa-solid fa-circle-check mb-2 text-emerald-500 opacity-0 scale-75 transition"></i>
-                                        <span class="text-2xl"><?= $i; ?></span>
-                                        <span class="mt-1 text-[11px] font-bold uppercase tracking-[.08em] text-slate-400">
+                                    <div class="answer-card flex min-h-[78px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 text-center font-black text-slate-500">
+                                        <i class="check-icon fa-solid fa-circle-check mb-1 text-emerald-500 opacity-0 scale-75 transition"></i>
+                                        <span class="text-xl"><?= $i; ?></span>
+                                        <span class="mt-1 text-[10px] font-bold uppercase tracking-[.08em] text-slate-400">
                                             <?= $i === 1 ? 'Tidak' : ($i === 2 ? 'Kurang' : ($i === 3 ? 'Netral' : ($i === 4 ? 'Setuju' : 'Sangat'))) ?>
                                         </span>
                                     </div>

@@ -20,13 +20,20 @@ $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $pertanyaan = mysqli_real_escape_string($conn, $_POST['pertanyaan']);
-    $query_update = "UPDATE soal_diagnostik SET pertanyaan = '$pertanyaan' WHERE id = $id";
+    $kategori_riasec = isset($_POST['kategori_riasec']) ? strtoupper(trim($_POST['kategori_riasec'])) : '';
+    $allowed_categories = ['R', 'I', 'A', 'E', 'C'];
 
-    if ($conn->query($query_update)) {
-        header("Location: admin.php");
-        exit;
+    if (!in_array($kategori_riasec, $allowed_categories, true)) {
+        $message = "<div class='p-3 bg-red-100 text-red-700 rounded-lg text-xs mb-4'>Kategori RIASEC tidak valid.</div>";
     } else {
-        $message = "<div class='p-3 bg-red-100 text-red-700 rounded-lg text-xs mb-4'>Gagal merubah data!</div>";
+        $query_update = "UPDATE soal_diagnostik SET pertanyaan = '$pertanyaan', kategori_riasec = '$kategori_riasec' WHERE id = $id";
+
+        if ($conn->query($query_update)) {
+            header("Location: admin.php");
+            exit;
+        } else {
+            $message = "<div class='p-3 bg-red-100 text-red-700 rounded-lg text-xs mb-4'>Gagal merubah data!</div>";
+        }
     }
 }
 ?>
@@ -48,6 +55,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div>
                     <label class="block font-medium text-gray-600 mb-1">Pernyataan Soal Ke-<?= $soal['nomor_urut']; ?>:</label>
                     <textarea name="pertanyaan" required rows="4" class="w-full p-2 border rounded-lg focus:outline-none text-sm"><?= htmlspecialchars($soal['pertanyaan']); ?></textarea>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-600 mb-1">Kategori RIASEC</label>
+                    <select name="kategori_riasec" required class="w-full p-2 border rounded-lg focus:outline-none text-sm bg-white">
+                        <?php
+                        $categories = ['R' => 'Realistic', 'I' => 'Investigative', 'A' => 'Artistic', 'E' => 'Enterprising', 'C' => 'Conventional'];
+                        foreach ($categories as $key => $label): ?>
+                            <option value="<?= $key; ?>" <?= $soal['kategori_riasec'] === $key ? 'selected' : ''; ?>><?= $key; ?> - <?= $label; ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="flex gap-2">
                     <a href="admin.php" class="w-1/3 bg-gray-200 text-center font-bold py-2 rounded-lg">Batal</a>
