@@ -434,16 +434,48 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
 
             .answer-row {
                 display: flex;
-                gap: 0.45rem;
-                overflow-x: auto;
+                flex-wrap: nowrap;
+                gap: 0.4rem;
+                overflow-x: hidden;
                 padding-bottom: 0.4rem;
                 margin: 0 -0.4rem;
                 padding-left: 0.4rem;
+                -webkit-overflow-scrolling: touch;
             }
 
+            .answer-item,
             .answer-row label {
-                min-width: 80px;
-                flex: 0 0 auto;
+                min-width: 0;
+                flex: 1 1 0;
+            }
+
+            @media (max-width: 640px) {
+                .answer-row {
+                    display: grid;
+                    grid-template-columns: repeat(5, minmax(0, 1fr));
+                    gap: 0.3rem;
+                    overflow-x: hidden;
+                    padding-left: 0;
+                    margin: 0;
+                }
+
+                .answer-item,
+                .answer-row label {
+                    width: 100%;
+                    flex: none;
+                }
+
+                .answer-card {
+                    padding: 0.5rem;
+                }
+
+                .answer-card span {
+                    font-size: 0.8rem;
+                }
+
+                .answer-card .check-icon {
+                    margin-bottom: 0.2rem;
+                }
             }
 
             .answer-row::-webkit-scrollbar {
@@ -673,7 +705,7 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                         </div>
                     </div>
                 </div>
-
+<!-- 
                 <div class="soft-card p-5">
                     <h3 class="text-base font-black text-slate-900">Petunjuk Singkat</h3>
                     <div class="mt-4 space-y-3">
@@ -683,7 +715,7 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                         <div class="flex gap-3"><i class="fa-solid fa-heart mt-1 text-amber-500"></i><p class="text-sm font-medium leading-6 text-slate-600">Jawablah dengan jujur.</p></div>
                         <div class="flex gap-3"><i class="fa-solid fa-list-check mt-1 text-indigo-600"></i><p class="text-sm font-medium leading-6 text-slate-600">Semua soal wajib dijawab.</p></div>
                     </div>
-                </div>
+                </div> -->
             </section>
 
             <section class="sticky top-[73px] z-30 mb-6 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm backdrop-blur-xl progress-sticky">
@@ -705,7 +737,7 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
             <form action="" method="POST" class="space-y-5" id="assessmentForm">
                 <input type="hidden" name="submit_asesmen" value="1">
                 <?php while($s = $soal_res->fetch_assoc()): ?>
-                    <div class="question-card soft-card p-6 sm:p-8" data-question-card data-question-number="<?= $s['nomor_urut']; ?>">
+                    <div class="question-card soft-card p-6 sm:p-8" data-question-card data-question-number="<?= $s['nomor_urut']; ?>" data-question-id="<?= $s['id']; ?>">
                         <div class="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                                 <p class="text-xs font-black uppercase tracking-[.16em] text-blue-700">Pertanyaan <?= $s['nomor_urut']; ?></p>
@@ -716,13 +748,13 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                             </span>
                         </div>
 
-                        <div class="answer-row grid gap-3 sm:grid-cols-5">
+                        <div class="answer-row">
                             <?php for($i=1; $i<=5; $i++): ?>
-                                <label class="cursor-pointer min-w-[90px]">
+                                <label class="cursor-pointer answer-item">
                                     <input type="radio" name="skala[<?= $s['id']; ?>]" value="<?= $i; ?>" required class="peer hidden">
-                                    <div class="answer-card flex min-h-[78px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 text-center font-black text-slate-500">
+                                    <div class="answer-card flex min-h-[72px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 text-center font-black text-slate-500">
                                         <i class="check-icon fa-solid fa-circle-check mb-1 text-emerald-500 opacity-0 scale-75 transition"></i>
-                                        <span class="text-xl"><?= $i; ?></span>
+                                        <span class="text-base font-black"><?= $i; ?></span>
                                         <span class="mt-1 text-[10px] font-bold uppercase tracking-[.08em] text-slate-400">
                                             <?= $i === 1 ? 'Tidak' : ($i === 2 ? 'Kurang' : ($i === 3 ? 'Netral' : ($i === 4 ? 'Setuju' : 'Sangat'))) ?>
                                         </span>
@@ -834,9 +866,11 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
         }
 
         questionCards.forEach(card => {
+            const questionId = card.getAttribute('data-question-id');
             card.querySelectorAll('input[type="radio"]').forEach(input => {
                 input.addEventListener('change', () => {
                     updateProgress();
+                    persistAnswer(questionId, input.value);
                     if (currentQuestion < questionCards.length - 1) {
                         setTimeout(() => {
                             currentQuestion++;
@@ -852,6 +886,7 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                 if (currentQuestion > 0) {
                     currentQuestion--;
                     showQuestion(currentQuestion);
+                    persistCurrentQuestion();
                 }
             });
         }
@@ -861,20 +896,65 @@ $soal_res = $conn->query("SELECT * FROM soal_diagnostik ORDER BY nomor_urut ASC"
                 if (currentQuestion < questionCards.length - 1) {
                     currentQuestion++;
                     showQuestion(currentQuestion);
+                    persistCurrentQuestion();
                 }
             });
+        }
+
+        function loadAssessmentState() {
+            try {
+                return JSON.parse(localStorage.getItem('diagnostik_assessment') || '{}');
+            } catch {
+                return {};
+            }
+        }
+
+        function saveAssessmentState(state) {
+            localStorage.setItem('diagnostik_assessment', JSON.stringify(state));
+        }
+
+        function restoreAssessmentState() {
+            const state = loadAssessmentState();
+            if (!state || !state.answers) return;
+
+            Object.entries(state.answers).forEach(([questionId, value]) => {
+                const input = document.querySelector(`input[name="skala[${questionId}]"][value="${value}"]`);
+                if (input) {
+                    input.checked = true;
+                }
+            });
+
+            if (typeof state.currentQuestion === 'number' && state.currentQuestion >= 0 && state.currentQuestion < questionCards.length) {
+                currentQuestion = state.currentQuestion;
+            }
+        }
+
+        function persistCurrentQuestion() {
+            const state = loadAssessmentState();
+            state.currentQuestion = currentQuestion;
+            saveAssessmentState(state);
+        }
+
+        function persistAnswer(questionId, value) {
+            const state = loadAssessmentState();
+            state.answers = state.answers || {};
+            state.answers[questionId] = value;
+            state.currentQuestion = currentQuestion;
+            saveAssessmentState(state);
         }
 
         if (assessmentForm && submitAssessment) {
             assessmentForm.addEventListener('submit', () => {
                 submitAssessment.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim Jawaban...';
                 submitAssessment.disabled = true;
+                localStorage.removeItem('diagnostik_assessment');
             });
         }
 
         if (questionCards.length) {
             renderDots();
-            showQuestion(0);
+            restoreAssessmentState();
+            showQuestion(currentQuestion);
         }
     </script>
 </body>

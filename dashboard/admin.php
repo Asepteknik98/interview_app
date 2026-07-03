@@ -852,6 +852,11 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
 
                             <!-- Mobile card view container for Hasil Tes (visible on small screens) -->
                             <div id="hasilTesCards" class="block md:hidden px-4 space-y-3"></div>
+
+                            <div id="jsHasilPaginationContainer" class="pagination-container flex flex-col gap-3 border-t border-slate-200 px-5 py-4 text-xs font-bold text-slate-500 sm:flex-row sm:items-center sm:justify-between no-print">
+                                <span id="jsHasilPaginationInfo">Menampilkan halaman 1</span>
+                                <div class="flex flex-wrap gap-2" id="jsHasilPaginationButtons"></div>
+                            </div>
                 </div>
             </section>
 
@@ -978,7 +983,7 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
             </section>
         </main>
 
-        <footer class="border-t border-slate-200 bg-white px-4 py-5 text-center text-xs font-bold text-slate-400">&copy; 2026 SPMB Web System &bull; SMK Jaya Buana</footer>
+        <footer class="border-t border-slate-200 bg-white px-4 py-5 text-center text-xs font-bold text-slate-400">&copy; 2026 SPMB &bull; SMK Jaya Buana</footer>
     </div>
 
     <div id="modalEdit" class="fixed inset-0 z-[70] flex hidden items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
@@ -1214,25 +1219,93 @@ while ($res_dist = $query_distribusi->fetch_assoc()) {
         searchInput.addEventListener('input', initPagination);
     }
 
-    document.addEventListener("DOMContentLoaded", initPagination);
+    document.addEventListener("DOMContentLoaded", () => {
+        initPagination();
+        initHasilPagination();
+    });
 
     const hasilSearchInput = document.getElementById('hasilSearchInput');
     const hasilRows = Array.from(document.querySelectorAll('.hasil-row-item'));
     const hasilEmptyRow = document.getElementById('hasilSearchEmptyRow');
+    const hasilRowsPerPage = 10;
+    let hasilCurrentPage = 1;
+    let hasilFilteredRows = [];
 
-    function filterHasilTes() {
-        const keyword = hasilSearchInput ? hasilSearchInput.value.toLowerCase().trim() : '';
-        let visibleRows = 0;
+    function initHasilPagination() {
+        hasilCurrentPage = 1;
+        filterHasilTes();
+    }
+
+    function renderHasilPage() {
+        const totalRows = hasilFilteredRows.length;
+        const totalPages = Math.ceil(totalRows / hasilRowsPerPage);
+        const startIndex = (hasilCurrentPage - 1) * hasilRowsPerPage;
+        const endIndex = startIndex + hasilRowsPerPage;
 
         hasilRows.forEach(row => {
-            const match = row.getAttribute('data-search').includes(keyword);
-            row.classList.toggle('hidden', !match);
-            if (match) visibleRows++;
+            row.classList.add('hidden');
+        });
+
+        hasilFilteredRows.forEach((row, index) => {
+            if (index >= startIndex && index < endIndex) {
+                row.classList.remove('hidden');
+            }
         });
 
         if (hasilEmptyRow) {
-            hasilEmptyRow.classList.toggle('hidden', visibleRows > 0 || hasilRows.length === 0);
+            hasilEmptyRow.classList.toggle('hidden', totalRows > 0);
         }
+
+        const infoSpan = document.getElementById('jsHasilPaginationInfo');
+        if (infoSpan) {
+            if (totalRows > 0) {
+                infoSpan.innerText = `Menampilkan ${startIndex + 1}-${Math.min(endIndex, totalRows)} dari ${totalRows} siswa`;
+            } else {
+                infoSpan.innerText = "Tidak ada siswa yang ditampilkan";
+            }
+        }
+
+        const buttonContainer = document.getElementById('jsHasilPaginationButtons');
+        if (!buttonContainer) return;
+        buttonContainer.innerHTML = '';
+
+        if (totalPages <= 1) {
+            document.getElementById('jsHasilPaginationContainer').classList.add('hidden');
+            return;
+        }
+
+        document.getElementById('jsHasilPaginationContainer').classList.remove('hidden');
+
+        if (hasilCurrentPage > 1) {
+            const prevBtn = document.createElement('button');
+            prevBtn.className = "rounded-xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-200";
+            prevBtn.innerHTML = "&laquo; Prev";
+            prevBtn.onclick = () => { hasilCurrentPage--; renderHasilPage(); };
+            buttonContainer.appendChild(prevBtn);
+        }
+
+        for (let i = 1; i <= totalPages; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = `rounded-xl px-3 py-2 text-xs font-black transition ${i === hasilCurrentPage ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+            pageBtn.innerText = i;
+            pageBtn.onclick = () => { hasilCurrentPage = i; renderHasilPage(); };
+            buttonContainer.appendChild(pageBtn);
+        }
+
+        if (hasilCurrentPage < totalPages) {
+            const nextBtn = document.createElement('button');
+            nextBtn.className = "rounded-xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-600 transition hover:bg-slate-200";
+            nextBtn.innerHTML = "Next &raquo;";
+            nextBtn.onclick = () => { hasilCurrentPage++; renderHasilPage(); };
+            buttonContainer.appendChild(nextBtn);
+        }
+    }
+
+    function filterHasilTes() {
+        const keyword = hasilSearchInput ? hasilSearchInput.value.toLowerCase().trim() : '';
+        hasilFilteredRows = hasilRows.filter(row => row.getAttribute('data-search').includes(keyword));
+        hasilCurrentPage = 1;
+        renderHasilPage();
     }
 
     if (hasilSearchInput) {

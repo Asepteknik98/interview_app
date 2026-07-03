@@ -182,7 +182,7 @@ if (!empty($data['keterangan_jurusan'])) {
                 Tim Penguji / Pewawancara,<br><br><br><br>
 
                 <span style="display:inline-block; border-bottom:1px solid #000; padding:0 20px;">
-                    ROFIQ OKVIANTO, M.Pd
+                    <!-- untuk isi nama penguji disini -->
                 </span>
             </td>
         </tr>
